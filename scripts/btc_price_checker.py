@@ -35,18 +35,28 @@ def get_btc_price() -> dict:
     }
 
 
+def _fmt_money(v, prefix: str, decimals: int = 2) -> str:
+    if v is None:
+        return f"{prefix}N/A"
+    try:
+        n = float(v)
+        return f"{prefix}{n:,.{decimals}f}"
+    except Exception:
+        # If API returns something unexpected, print raw
+        return f"{prefix}{v}"
+
+
 def main() -> None:
     try:
         btc = get_btc_price()
-        # 容错：如果 API 返回结构变化，仍然能输出
-        usd = btc.get("usd")
-        cny = btc.get("cny")
         ts = btc.get("timestamp")
 
-        print("BTC 当前价格")
-        print(f"USD: ${usd}")
-        print(f"CNY: ¥{cny}")
-        print(f"更新时间(UTC): {ts}")
+        usd = _fmt_money(btc.get("usd"), "$", 2)
+        cny = _fmt_money(btc.get("cny"), "¥", 2)
+
+        print(f"BTC 现货 · {ts}")
+        print(f"USD: {usd}")
+        print(f"CNY: {cny}")
         print("来源: CoinGecko")
     except Exception as e:
         print(f"获取 BTC 价格失败: {e}")
